@@ -1,0 +1,88 @@
+{
+  "agents": [
+    {
+      "agent_id": "aebb934",
+      "agent_type": "oh-my-claudecode:executor",
+      "started_at": "2026-02-14T23:01:15.097Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-02-14T23:05:50.601Z",
+      "duration_ms": 275504
+    },
+    {
+      "agent_id": "a4a8333",
+      "agent_type": "executor-skills",
+      "started_at": "2026-02-15T01:22:19.502Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-02-15T01:22:25.240Z",
+      "duration_ms": 5738
+    },
+    {
+      "agent_id": "af95bef",
+      "agent_type": "executor-ops",
+      "started_at": "2026-02-15T01:23:13.463Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-02-15T01:23:21.747Z",
+      "duration_ms": 8284
+    },
+    {
+      "agent_id": "a40623d",
+      "agent_type": "executor-boards",
+      "started_at": "2026-02-15T01:30:43.702Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-02-15T01:30:52.805Z",
+      "duration_ms": 9103
+    },
+    {
+      "agent_id": "aa28766",
+      "agent_type": "executor-config",
+      "started_at": "2026-02-15T01:40:35.674Z",
+      "parent_mode": "none",
+      "status": "running"
+    },
+    {
+      "agent_id": "aeec403",
+      "agent_type": "executor-skills",
+      "started_at": "2026-02-15T01:40:36.273Z",
+      "parent_mode": "none",
+      "status": "running"
+    },
+    {
+      "agent_id": "abeb7ba",
+      "agent_type": "executor-brain",
+      "started_at": "2026-02-15T01:40:37.037Z",
+      "parent_mode": "none",
+      "status": "running"
+    },
+    {
+      "agent_id": "a1d568d",
+      "agent_type": "executor-boards",
+      "started_at": "2026-02-15T01:40:37.655Z",
+      "parent_mode": "none",
+      "status": "running"
+    },
+    {
+      "agent_id": "af60636",
+      "agent_type": "executor-ops",
+      "started_at": "2026-02-15T01:40:38.070Z",
+      "parent_mode": "none",
+      "status": "running"
+    },
+    {
+      "agent_id": "af5a7eb",
+      "agent_type": "oh-my-claudecode:explore",
+      "started_at": "2026-02-15T04:45:17.503Z",
+      "parent_mode": "none",
+      "status": "completed",
+      "completed_at": "2026-02-15T04:46:08.783Z",
+      "duration_ms": 51280
+    }
+  ],
+  "total_spawned": 10,
+  "total_completed": 5,
+  "total_failed": 0,
+  "last_updated": "2026-02-15T04:59:29.620Z"
+}
