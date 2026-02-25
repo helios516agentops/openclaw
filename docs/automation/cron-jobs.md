@@ -11,10 +11,10 @@ title: "Cron Jobs"
 
 > **Cron vs Heartbeat?** See [Cron vs Heartbeat](/automation/cron-vs-heartbeat) for guidance on when to use each.
 
-Cron is the Gateway’s built-in scheduler. It persists jobs, wakes the agent at
+Cron is the Gateway's built-in scheduler. It persists jobs, wakes the agent at
 the right time, and can optionally deliver output back to a chat.
 
-If you want _“run this every morning”_ or _“poke the agent in 20 minutes”_,
+If you want _"run this every morning"_ or _"poke the agent in 20 minutes"_,
 cron is the mechanism.
 
 Troubleshooting: [/automation/troubleshooting](/automation/troubleshooting)
@@ -22,11 +22,11 @@ Troubleshooting: [/automation/troubleshooting](/automation/troubleshooting)
 ## TL;DR
 
 - Cron runs **inside the Gateway** (not inside the model).
-- Jobs persist under `~/.openclaw/cron/` so restarts don’t lose schedules.
+- Jobs persist under `~/.openclaw/cron/` so restarts don't lose schedules.
 - Two execution styles:
   - **Main session**: enqueue a system event, then run on the next heartbeat.
   - **Isolated**: run a dedicated agent turn in `cron:<jobId>`, with delivery (announce by default or none).
-- Wakeups are first-class: a job can request “wake now” vs “next heartbeat”.
+- Wakeups are first-class: a job can request "wake now" vs "next heartbeat".
 
 ## Quick start (actionable)
 
@@ -115,7 +115,7 @@ Cron supports three schedule kinds:
 - `every`: fixed interval (ms).
 - `cron`: 5-field cron expression with optional IANA timezone.
 
-Cron expressions use `croner`. If a timezone is omitted, the Gateway host’s
+Cron expressions use `croner`. If a timezone is omitted, the Gateway host's
 local timezone is used.
 
 ### Main vs isolated execution
@@ -219,8 +219,8 @@ Isolated jobs can deliver output to a channel via the top-level `delivery` confi
 
 Delivery config is only valid for isolated jobs (`sessionTarget: "isolated"`).
 
-If `delivery.channel` or `delivery.to` is omitted, cron can fall back to the main session’s
-“last route” (the last place the agent replied).
+If `delivery.channel` or `delivery.to` is omitted, cron can fall back to the main session's
+"last route" (the last place the agent replied).
 
 Target format reminders:
 
@@ -285,7 +285,10 @@ Recurring, isolated job with delivery:
 Notes:
 
 - `schedule.kind`: `at` (`at`), `every` (`everyMs`), or `cron` (`expr`, optional `tz`).
-- `schedule.at` accepts ISO 8601 (timezone optional; treated as UTC when omitted).
+- `schedule.at` accepts ISO 8601 (timezone optional; treated as UTC when omitted). **Validation constraints:**
+  - Timestamps are rejected if more than 1 minute in the past (grace period for clock skew).
+  - Timestamps are rejected if more than 10 years in the future (sanity check).
+  - Invalid calendar dates (e.g., Feb 30, leap day on non-leap years) are rejected.
 - `everyMs` is milliseconds.
 - `sessionTarget` must be `"main"` or `"isolated"` and must match `payload.kind`.
 - Optional fields: `agentId`, `description`, `enabled`, `deleteAfterRun` (defaults to true for `at`),
@@ -458,7 +461,7 @@ openclaw system event --mode now --text "Next heartbeat: check battery."
 
 ## Troubleshooting
 
-### “Nothing runs”
+### "Nothing runs"
 
 - Check cron is enabled: `cron.enabled` and `OPENCLAW_SKIP_CRON`.
 - Check the Gateway is running continuously (cron runs inside the Gateway process).
@@ -473,6 +476,43 @@ openclaw system event --mode now --text "Next heartbeat: check battery."
 
 ### Telegram delivers to the wrong place
 
-- For forum topics, use `-100…:topic:<id>` so it’s explicit and unambiguous.
-- If you see `telegram:...` prefixes in logs or stored “last route” targets, that’s normal;
+- For forum topics, use `-100…:topic:<id>` so it's explicit and unambiguous.
+- If you see `telegram:...` prefixes in logs or stored "last route" targets, that's normal;
   cron delivery accepts them and still parses topic IDs correctly.
+
+### "schedule.at is in the past" or timestamp validation errors
+
+When creating an `at` job (one-shot schedule), the timestamp is validated against current time:
+
+**Timestamp too far in the past:**
+
+```
+schedule.at is in the past: 2026-02-23T10:00:00.000Z (2 hours ago). Current time: 2026-02-23T12:00:00.000Z
+```
+
+The system allows a 1-minute grace period for clock skew. If your timestamp is more than 1 minute ago, it's rejected. Solution: use a future timestamp.
+
+**Timestamp too far in the future:**
+
+```
+schedule.at is too far in the future: 2036-02-23T12:00:00.000Z (10 years ahead). Maximum allowed: 10 years
+```
+
+The system rejects timestamps beyond 10 years ahead as a sanity check. If you need a job that far out, break it into smaller intervals or use a recurring schedule instead.
+
+**Invalid calendar date:**
+
+```
+Invalid schedule.at: expected ISO-8601 timestamp (got 2026-02-30T11:00:00Z)
+```
+
+The system validates calendar dates against leap years and month lengths. Feb 30 doesn't exist, and Feb 29 is only valid on leap years (e.g., 2028 is a leap year, but 2025 is not).
+
+**Valid timestamps:**
+
+- `2026-02-24T11:00:00Z` (ISO with UTC timezone)
+- `2026-02-24T11:00:00-05:00` (with explicit offset)
+- `2026-02-24` (date-only, treated as UTC midnight)
+- `900000` (milliseconds since epoch)
+
+For relative timing (e.g., "20 minutes from now"), use CLI shorthand like `--at 20m` which handles the calculation.
